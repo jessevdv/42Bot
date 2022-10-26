@@ -11,7 +11,7 @@ client = pymongo.MongoClient(f"mongodb+srv://Neutron:{mongo_secret}@codambot.dbb
 db = client.CodamBot
 collection = db.Users
 
-iapi = IntraAPI()
+intra_api = IntraAPI()
 
 class friends(commands.Cog):
   def __init__(self, bot):
@@ -40,7 +40,7 @@ class friends(commands.Cog):
           embed = discord.Embed(title=f"**⚡️ My Friends** • `({len(friendlist)}/25)`", color = color)
           ## GET ONLINE FRIENDS ##
           for friend in friendlist:
-            res = (iapi.request(f"users/{friend}")).json()
+            res = (intra_api.request(f"users/{friend}")).json()
             location = res["location"]
             name = res["first_name"]
             if not location:
@@ -67,7 +67,7 @@ class friends(commands.Cog):
 
     message = await ctx.reply("`⏳` Loading...")
     
-    res = iapi.request(f"users/{friend}")
+    res = intra_api.request(f"users/{friend}")
     if res.status_code == 200:
       if friend is None:
         await message.edit(content="⚠️ Please specify which friend you want to add!")
@@ -127,7 +127,7 @@ class friends(commands.Cog):
         try:
           ## GET ONLINE FRIENDS ##
           for friend in friendlist:
-            res = (iapi.request(f"users/{friend}")).json()
+            res = (intra_api.request(f"users/{friend}")).json()
             location = res["location"]
             if location:
               location = location[0:7]
