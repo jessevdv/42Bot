@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-class PremiumBot(commands.Cog):
+class FortyTwoBot(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -9,7 +9,7 @@ class PremiumBot(commands.Cog):
     @commands.Cog.listener()
     async def on_resumed(self):
         print('Bot has reconnected!')
-        await self.bot.change_presence(activity=discord.Game(name="with signals"))
+        await self.bot.change_presence(activity=discord.Game(name="with c"))
         
     # Error Handlers
     @commands.Cog.listener()
@@ -26,4 +26,4 @@ class PremiumBot(commands.Cog):
             await ctx.send(":no_entry: You don't have permission to use this command!")
           
 async def setup(bot):
-  await bot.add_cog(PremiumBot(bot))
+  await bot.add_cog(FortyTwoBot(bot))

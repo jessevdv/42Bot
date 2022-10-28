@@ -14,8 +14,8 @@ class CodamBot(commands.Bot):
         super().__init__(command_prefix=commands.when_mentioned_or('!'), intents=intents)
 
     async def on_ready(self):
-        print(f'Logged in as {self.user} (ID: {self.user.id})')
-        print('------')
+      print(f'⚡️⚡️⚡️ Logged in as {self.user} (ID: {self.user.id})')
+      print('------')
 
 bot = CodamBot()
 
