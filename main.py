@@ -3,7 +3,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-
+from commands.views import DeleteData
 
 # Discord Bot Token
 my_secret = os.environ['token']
@@ -12,7 +12,10 @@ class CodamBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents(messages=True, guilds=True, members=True, message_content=True)
         super().__init__(command_prefix=commands.when_mentioned_or('!'), intents=intents)
-
+      
+    async def setup_hook(self) -> None:
+        self.add_view(DeleteData())
+      
     async def on_ready(self):
       print(f'⚡️⚡️⚡️ Logged in as {self.user} (ID: {self.user.id})')
       print('------')

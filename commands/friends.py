@@ -1,17 +1,12 @@
-from utils import IntraAPI
 import discord
-import os
 from discord.ext import commands
-import pymongo
 import time
 
-## MONGODB CONNECT ##
-mongo_secret = os.environ['mongo_secret']
-client = pymongo.MongoClient(f"mongodb+srv://Neutron:{mongo_secret}@codambot.dbbyafe.mongodb.net/?retryWrites=true&w=majority")
-db = client.CodamBot
-collection = db.Users
+from utils import IntraAPI, connectMongo
+from commands.views import DeleteData
 
 intra_api = IntraAPI()
+users = connectMongo("Users")
 
 class friends(commands.Cog):
   def __init__(self, bot):
@@ -30,7 +25,7 @@ class friends(commands.Cog):
     message = await ctx.reply(embed=loading_embed)
 
     ## GET USER FROM DB##
-    user = collection.find_one({"_id": user_id})
+    user = users.find_one({"_id": user_id})
     
     if user is not None:
       friendlist = user["friends"]
@@ -66,24 +61,21 @@ class friends(commands.Cog):
   @commands.command()
   async def addfriend(self, ctx: commands.Context, friend: str):  
     user_id = str(ctx.author.id)
-    user = collection.find_one({"_id": user_id})
+    user = users.find_one({"_id": user_id})
     message = await ctx.reply("`⏳` Loading...")
     
     res = intra_api.request(f"users/{friend}")
     if res.status_code == 200:
-      data = res.json()
-      first_name = data["first_name"]
-      last_name = data["last_name"]
       if friend is None:
         await message.edit(content="⚠️ Please specify which friend you want to add!")
       else:
         if user is None:
-          collection.insert_one({"_id" : user_id, "friends" : [], "timestamp":time.time()})
-          collection.update_one({"_id" : user_id}, {"$push": {"friends": friend}})
-          await message.edit(content="✅ Friend **added** succesfully!")
+          users.insert_one({"_id" : user_id, "friends" : [], "timestamp":time.time()})
+          users.update_one({"_id" : user_id}, {"$push": {"friends": friend}})
+          await message.edit(content=f"✅Welcome {ctx.author}! Your first friend has been **added** succesfully!")
         if len(user["friends"]) < 25:
           if friend not in user["friends"]:
-            collection.update_one({"_id" : user_id}, {"$push": {"friends": friend}})
+            users.update_one({"_id" : user_id}, {"$push": {"friends": friend}})
             await message.edit(content="✅ Friend **added** succesfully!")
           else:
             await message.edit(content="⚠️ You can't be friends twice with the same person!")
@@ -95,7 +87,7 @@ class friends(commands.Cog):
   @commands.command()
   async def remfriend(self, ctx: commands.Context, friend: str):  
     user_id = str(ctx.author.id)
-    user = collection.find_one({"_id": user_id})
+    user = users.find_one({"_id": user_id})
 
     message = await ctx.reply("`⏳` Loading...")
     
@@ -105,11 +97,19 @@ class friends(commands.Cog):
       if user is None:
         await message.edit(content="⚠️ How can you remove a friend if you don't have any to begin with? Add one with Add one with the command **!addfriend <intra_id>**")
       if friend in user["friends"]:
-        collection.update_one({"_id" : user_id}, {"$pull": {"friends": friend}})
+        users.update_one({"_id" : user_id}, {"$pull": {"friends": friend}})
         await message.edit(content="✅ Friend **removed** succesfully!")
       else:
         await message.edit(content="⚠️ You can't remove a friend who is not your friend!")
-  
+
+  @commands.command()
+  async def delete(self, ctx: commands.Context):
+    deleteview = DeleteData()
+    color_err = discord.Colour.from_str("#FC0303")
+    embed = discord.Embed(description="You are about to delete your data from the database, press **Delete** if you wish to proceed.", color=color_err)
+    deleteview.user_id = str(ctx.author.id)
+    await ctx.send(embed=embed, view=deleteview)
+    
   @commands.command()
   async def friendmap(self, ctx: commands.Context):  
     print()

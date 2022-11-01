@@ -8,6 +8,7 @@ import requests
 import requests_cache
 import os
 import time
+import pymongo
 
 requests_cache.install_cache(expire_after=360, allowable_methods=('GET', 'POST'))
 
@@ -47,7 +48,7 @@ class IntraAPI(object):
     if rc != 200:
       logging.warning(f"{res.reason}")
       if rc == 429:
-        LOG.info(f"Rate limit exceeded - Waiting {res.headers['Retry-After']}s before requesting again")
+        logging.info(f"Rate limit exceeded - Waiting {res.headers['Retry-After']}s before requesting again")
         time.sleep(float(res.headers['Retry-After']))
         self.request(url)
       if rc == 401:
@@ -55,4 +56,12 @@ class IntraAPI(object):
         self.request(url)
     logging.info(f"Request to {url} returned with code {rc}")    
     return (res)
-    
+
+
+def connectMongo(collection_name: str):
+  mongo_secret = os.environ['mongo_secret']
+  client = pymongo.MongoClient(f"mongodb+srv://Neutron:{mongo_secret}@codambot.dbbyafe.mongodb.net/?retryWrites=true&w=majority")
+  db = client.CodamBot
+  collection = db[collection_name]
+  
+  return collection

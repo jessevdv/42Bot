@@ -14,7 +14,6 @@ class UserInfo(commands.Cog):
       data = res.json()
       rc = res.status_code
       if rc == 200:
-        print(data)
         name = data["usual_full_name"]
         intra_url = data["url"]
         kind = data["kind"]
@@ -40,6 +39,8 @@ class UserInfo(commands.Cog):
         embed.set_thumbnail(url=image)
 
         await ctx.send(embed=embed)
+      else:
+        await ctx.send("⚠️ Thats not a valid intra_id please try again!")
         
 async def setup(bot):
   await bot.add_cog(UserInfo(bot))
